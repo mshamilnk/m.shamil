@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item List</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 0;
+            background-color: #2c1300; /* Deep fire background */
+            color: #ffd700; /* Gold text */
+            position: relative; /* Ensure relative positioning for absolute button */
+        }
+
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* List Styles */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        li {
+            margin: 20px;
+            padding: 20px;
+            background-color: #4c1f00; /* Dark fire card background */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        li:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        img {
+            float: left;
+            margin-right: 15px;
+            border-radius: 6px;
+            box-shadow: 0 0 5px rgba(255,215,0,0.5); /* Gold glow */
+            transition: transform 0.3s ease;
+            cursor: pointer; /* Add cursor pointer for clickable effect */
+        }
+
+        li:hover img {
+            transform: scale(1.1);
+        }
+
+        .item-details {
+            margin-top: 10px;
+        }
+
+        .item-details h2 {
+            margin: 0;
+            color: #ffd700; /* Gold text */
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .item-details p {
+            color: #ffb74d; /* Lighter gold text */
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .item-actions {
+            margin-top: 15px;
+        }
+
+        .item-actions a {
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            color: #ffd700; /* Gold text */
+            background-color: #8b4513; /* Brownish-red accent */
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .item-actions a:hover {
+            background-color: #6e3012; /* Darker brownish-red on hover */
+        }
+
+        .add-new-item {
+            text-align: left; /* Align button to the left */
+            position: absolute; /* Position absolute for precise placement */
+            top: 20px; /* Adjust from the top */
+            left: 20px; /* Adjust from the left */
+        }
+
+        .add-new-item a {
+            text-decoration: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            color: #ffd700; /* Gold text */
+            background-color: #ff6347; /* Tomato red accent */
+            font-size: 1rem;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-new-item a:hover {
+            background-color: #e74c3c; /* Darker tomato red on hover */
+        }
+
+        /* Lightbox Styles */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Dark semi-transparent background */
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: hidden;
+        }
+
+        .lightbox img {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7); /* Gold glow */
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="add-new-item">
+        <a href="{% url 'item_create' %}">Add new item</a>
+    </div>
+    <h1>Item List</h1>
+    <ul>
+        {% for item in items %}
+            <li>
+                <img src="{{ item.image.url }}" alt="{{ item.name }}" width="300" onclick="openLightbox('{{ item.image.url }}', '{{ item.name }}')">
+                <div class="item-details">
+                    <h2>{{ item.name }}</h2>
+                    <p>{{ item.description }}</p>
+                </div>
+                <div class="item-actions">
+                    <a href="{% url 'item_update' item.pk %}">Edit</a>
+                    <a href="{% url 'item_delete' item.pk %}">Delete</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Lightbox Markup -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <img id="lightbox-img" src="" alt="Large Image">
+            <span class="close-btn" onclick="closeLightbox()">&times;</span>
+        </div>
+    </div>
+
+    <!-- JavaScript for Lightbox -->
+    <script>
+        function openLightbox(imageUrl, itemName) {
+            var lightbox = document.getElementById('lightbox');
+            var lightboxImg = document.getElementById('lightbox-img');
+
+            lightboxImg.src = imageUrl;
+            lightboxImg.alt = itemName;
+
+            lightbox.style.display = 'flex'; // Display lightbox
+        }
+
+        function closeLightbox() {
+            var lightbox = document.getElementById('lightbox');
+            lightbox.style.display = 'none'; // Hide lightbox
+        }
+    </script>
+</body>
+</html>
